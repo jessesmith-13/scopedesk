@@ -1,0 +1,13 @@
+/* src/styles/fonts.css */
+
+/* If you later add custom fonts, put @font-face declarations here. */
+
+/* Optional: global font stack (safe even if you don't add custom fonts) */
+:root {
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+
+body {
+  font-family: var(--font-sans);
+}

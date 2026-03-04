@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Figma Make tokens + base styles */
+@import "./styles/theme.css";
+
+/* Minimal global safety resets (won’t fight theme) */
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100%;
+}
