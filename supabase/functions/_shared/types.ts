@@ -1,5 +1,5 @@
-// Generated Supabase types - will be auto-generated once Supabase is connected
-// For now, defining manually based on schema
+// Shared types for edge functions
+// Re-export the Database type from the generated Supabase types
 
 export type Json =
   | string
@@ -64,12 +64,11 @@ export interface Database {
           website_url: string | null;
           website_status: WebsiteStatus;
           outreach_status: LeadOutreachStatus;
-          rating: number | null;
-          review_count: number | null;
           score: number;
           score_reason: Json | null;
           source: string | null;
           source_place_id: string | null;
+          dedupe_key: string | null;
           notes: string | null;
           created_at: string;
           updated_at: string;
@@ -93,12 +92,11 @@ export interface Database {
           website_url?: string | null;
           website_status?: WebsiteStatus;
           outreach_status?: LeadOutreachStatus;
-          rating?: number | null;
-          review_count?: number | null;
           score?: number;
           score_reason?: Json | null;
           source?: string | null;
           source_place_id?: string | null;
+          dedupe_key?: string | null;
           notes?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -122,12 +120,11 @@ export interface Database {
           website_url?: string | null;
           website_status?: WebsiteStatus;
           outreach_status?: LeadOutreachStatus;
-          rating?: number | null;
-          review_count?: number | null;
           score?: number;
           score_reason?: Json | null;
           source?: string | null;
           source_place_id?: string | null;
+          dedupe_key?: string | null;
           notes?: string | null;
           created_at?: string;
           updated_at?: string;

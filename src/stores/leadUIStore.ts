@@ -27,6 +27,18 @@ interface LeadUIState {
   
   addLeadModalOpen: boolean;
   setAddLeadModalOpen: (open: boolean) => void;
+  
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  
+  itemsPerPage: number;
+  setItemsPerPage: (items: number) => void;
+  
+  sortColumn: string | null;
+  setSortColumn: (column: string | null) => void;
+  
+  sortDirection: 'asc' | 'desc';
+  setSortDirection: (direction: 'asc' | 'desc') => void;
 }
 
 export const useLeadUIStore = create<LeadUIState>((set) => ({
@@ -56,4 +68,16 @@ export const useLeadUIStore = create<LeadUIState>((set) => ({
   
   addLeadModalOpen: false,
   setAddLeadModalOpen: (open) => set({ addLeadModalOpen: open }),
+  
+  currentPage: 1,
+  setCurrentPage: (page) => set({ currentPage: page }),
+  
+  itemsPerPage: 10,
+  setItemsPerPage: (items) => set({ itemsPerPage: items }),
+  
+  sortColumn: null,
+  setSortColumn: (column) => set({ sortColumn: column }),
+  
+  sortDirection: 'desc',
+  setSortDirection: (direction) => set({ sortDirection: direction }),
 }));

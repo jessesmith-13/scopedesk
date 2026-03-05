@@ -35,6 +35,9 @@ export interface OverpassNode {
     shop?: string;
     amenity?: string;
     craft?: string;
+    office?: string;
+    healthcare?: string;
+    leisure?: string;
     [key: string]: string | undefined;
   };
 }
@@ -60,8 +63,8 @@ export function buildOverpassQuery({
 
   // Build category filters
   const categoryFilters = categories.length > 0
-    ? categories.map(cat => getCategoryFilter(cat)).join('')
-    : getAllBusinessFilters();
+    ? categories.map(cat => getCategoryFilter(cat, radiusMeters, lat, lng)).join('')
+    : getAllBusinessFilters(radiusMeters, lat, lng);
 
   return `
 [out:json][timeout:${OVERPASS_CONFIG.timeout}];
@@ -71,28 +74,33 @@ export function buildOverpassQuery({
 out body;
 >;
 out skel qt;
-  `.trim().replace(/\s+/g, ' ').replace(/\n/g, '');
-  
-  function getCategoryFilter(category: string): string {
-    const filters: Record<string, string> = {
-      'restaurants': `node(around:${radiusMeters},${lat},${lng})["amenity"="restaurant"];`,
-      'salons': `node(around:${radiusMeters},${lat},${lng})["shop"="hairdresser"];node(around:${radiusMeters},${lat},${lng})["shop"="beauty"];`,
-      'contractors': `node(around:${radiusMeters},${lat},${lng})["craft"="carpenter"];node(around:${radiusMeters},${lat},${lng})["craft"="plumber"];node(around:${radiusMeters},${lat},${lng})["craft"="electrician"];`,
-      'dental': `node(around:${radiusMeters},${lat},${lng})["amenity"="dentist"];`,
-      'fitness': `node(around:${radiusMeters},${lat},${lng})["leisure"="fitness_centre"];node(around:${radiusMeters},${lat},${lng})["sport"="fitness"];`,
-      'retail': `node(around:${radiusMeters},${lat},${lng})["shop"];`,
-    };
-    return filters[category] || '';
-  }
+  `.trim().replace(/\\s+/g, ' ').replace(/\\n/g, '');
+}
 
-  function getAllBusinessFilters(): string {
-    return `
-      node(around:${radiusMeters},${lat},${lng})["shop"];
-      node(around:${radiusMeters},${lat},${lng})["amenity"~"restaurant|cafe|bar|dentist|veterinary"];
-      node(around:${radiusMeters},${lat},${lng})["craft"];
-      node(around:${radiusMeters},${lat},${lng})["leisure"="fitness_centre"];
-    `;
-  }
+function getCategoryFilter(category: string, radiusMeters: number, lat: number, lng: number): string {
+  const filters: Record<string, string> = {
+    'restaurants': `node(around:${radiusMeters},${lat},${lng})["amenity"="restaurant"];node(around:${radiusMeters},${lat},${lng})["amenity"="cafe"];`,
+    'salons': `node(around:${radiusMeters},${lat},${lng})["shop"="hairdresser"];node(around:${radiusMeters},${lat},${lng})["shop"="beauty"];node(around:${radiusMeters},${lat},${lng})["leisure"="spa"];`,
+    'contractors': `node(around:${radiusMeters},${lat},${lng})["craft"="carpenter"];node(around:${radiusMeters},${lat},${lng})["craft"="plumber"];node(around:${radiusMeters},${lat},${lng})["craft"="electrician"];node(around:${radiusMeters},${lat},${lng})["craft"="painter"];node(around:${radiusMeters},${lat},${lng})["craft"="roofer"];`,
+    'dental': `node(around:${radiusMeters},${lat},${lng})["amenity"="dentist"];`,
+    'fitness': `node(around:${radiusMeters},${lat},${lng})["leisure"="fitness_centre"];node(around:${radiusMeters},${lat},${lng})["sport"="fitness"];`,
+    'retail': `node(around:${radiusMeters},${lat},${lng})["shop"];`,
+    'automotive': `node(around:${radiusMeters},${lat},${lng})["shop"="car_repair"];node(around:${radiusMeters},${lat},${lng})["amenity"="car_wash"];node(around:${radiusMeters},${lat},${lng})["shop"="car"];`,
+    'professional': `node(around:${radiusMeters},${lat},${lng})["office"="lawyer"];node(around:${radiusMeters},${lat},${lng})["office"="accountant"];node(around:${radiusMeters},${lat},${lng})["office"="insurance"];node(around:${radiusMeters},${lat},${lng})["office"="estate_agent"];`,
+    'health': `node(around:${radiusMeters},${lat},${lng})["amenity"="doctors"];node(around:${radiusMeters},${lat},${lng})["amenity"="pharmacy"];node(around:${radiusMeters},${lat},${lng})["amenity"="veterinary"];node(around:${radiusMeters},${lat},${lng})["healthcare"="physiotherapist"];`,
+  };
+  return filters[category] || '';
+}
+
+function getAllBusinessFilters(radiusMeters: number, lat: number, lng: number): string {
+  return `
+    node(around:${radiusMeters},${lat},${lng})["shop"];
+    node(around:${radiusMeters},${lat},${lng})["amenity"~"restaurant|cafe|bar|dentist|veterinary|doctors|pharmacy|car_wash"];
+    node(around:${radiusMeters},${lat},${lng})["craft"];
+    node(around:${radiusMeters},${lat},${lng})["office"~"lawyer|accountant|insurance|estate_agent"];
+    node(around:${radiusMeters},${lat},${lng})["leisure"="fitness_centre"];
+    node(around:${radiusMeters},${lat},${lng})["healthcare"="physiotherapist"];
+  `;
 }
 
 /**
@@ -152,28 +160,47 @@ export function getBusinessCategory(node: OverpassNode): string {
   if (tags.amenity === 'cafe') return 'Cafe';
   if (tags.amenity === 'bar') return 'Bar';
   if (tags.amenity === 'dentist') return 'Dental';
-  if (tags.amenity === 'veterinary') return 'Pet Services';
+  if (tags.amenity === 'veterinary') return 'Veterinary';
+  if (tags.amenity === 'doctors') return 'Doctor';
+  if (tags.amenity === 'pharmacy') return 'Pharmacy';
+  if (tags.amenity === 'car_wash') return 'Car Wash';
   if (tags.shop === 'hairdresser') return 'Hair Salon';
   if (tags.shop === 'beauty') return 'Beauty Salon';
   if (tags.shop === 'florist') return 'Florist';
   if (tags.shop === 'bakery') return 'Bakery';
   if (tags.shop === 'hardware') return 'Hardware Store';
+  if (tags.shop === 'car_repair') return 'Auto Repair';
+  if (tags.shop === 'car') return 'Car Dealer';
   if (tags.craft === 'carpenter') return 'Carpenter';
   if (tags.craft === 'plumber') return 'Plumber';
   if (tags.craft === 'electrician') return 'Electrician';
+  if (tags.craft === 'painter') return 'Painter';
+  if (tags.craft === 'roofer') return 'Roofer';
+  if (tags.office === 'lawyer') return 'Legal Services';
+  if (tags.office === 'accountant') return 'Accounting';
+  if (tags.office === 'insurance') return 'Insurance';
+  if (tags.office === 'estate_agent') return 'Real Estate';
+  if (tags.healthcare === 'physiotherapist') return 'Physical Therapy';
   if (tags.leisure === 'fitness_centre') return 'Fitness';
+  if (tags.leisure === 'spa') return 'Spa';
   if (tags.shop) return 'Retail';
   
   return 'Other';
 }
 
 /**
- * Check if business has a website
+ * Check if business has a website based on OSM data
+ * Note: OSM data is crowdsourced and often incomplete. 
+ * "Unknown" means we don't have data, not that they don't have a website.
  */
 export function getWebsiteStatus(node: OverpassNode): 'has' | 'none' | 'unknown' {
+  // Check for explicit website tags
   if (node.tags.website || node.tags['contact:website']) return 'has';
-  // If we have detailed tags but no website, assume none
-  if (node.tags.phone || node.tags['contact:phone']) return 'none';
+  
+  // Check for "no website" tag (some OSM contributors explicitly mark this)
+  if (node.tags['website'] === 'no' || node.tags['contact:website'] === 'no') return 'none';
+  
+  // Everything else is unknown - OSM might just not have the data yet
   return 'unknown';
 }
 

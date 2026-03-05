@@ -1,30 +1,23 @@
 /**
- * Google Places API integration
- * Get your API key from: https://console.cloud.google.com/google/maps-apis
+ * Google Places API integration (Frontend - Autocomplete Only)
+ * 
+ * This module ONLY handles location autocomplete for the UI.
+ * All business search functionality goes through /src/api/places.ts → Edge Functions.
  * 
  * Setup Instructions:
  * 1. Go to https://console.cloud.google.com
  * 2. Create a new project or select existing
  * 3. Enable "Places API" and "Geocoding API"
  * 4. Create credentials -> API Key
- * 5. Restrict your API key:
- *    - Application restrictions: HTTP referrers (your domain)
- *    - API restrictions: Places API, Geocoding API
- * 6. Add VITE_GOOGLE_PLACES_API_KEY to your .env file
+ * 5. For location autocomplete, add VITE_GOOGLE_PLACES_API_KEY to .env file
+ * 6. For business search, add GOOGLE_PLACES_API_KEY to Supabase Edge Function environment
  */
 
-// Get API key from environment variables
+// Get API key from environment variables (only used for location autocomplete)
 const getApiKey = (): string => {
   const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
   
   if (!apiKey || apiKey === 'YOUR_GOOGLE_PLACES_API_KEY' || apiKey.includes('placeholder')) {
-    // Only warn once in development
-    if (import.meta.env.DEV && apiKey && !apiKey.includes('placeholder')) {
-      console.warn(
-        'Google Places API key not configured. ' +
-        'Add VITE_GOOGLE_PLACES_API_KEY to your .env file.'
-      );
-    }
     return '';
   }
   
@@ -32,7 +25,7 @@ const getApiKey = (): string => {
 };
 
 export const googlePlacesConfig = {
-  // API key from environment variables
+  // API key from environment variables (only for autocomplete)
   get apiKey() {
     return getApiKey();
   },
@@ -89,12 +82,13 @@ export interface PlacesAutocompleteService {
 }
 
 /**
- * Load Google Places API script dynamically
+ * Load Google Places API script dynamically (only for autocomplete)
  */
 export const loadGooglePlacesScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
-    if (!googlePlacesConfig.isConfigured) {
-      reject(new Error('Google Places API key not configured'));
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      reject(new Error('Google Places API key not configured for autocomplete'));
       return;
     }
 
@@ -118,7 +112,7 @@ export const loadGooglePlacesScript = (): Promise<void> => {
 
     // Create and load script
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${googlePlacesConfig.apiKey}&libraries=places&v=${googlePlacesConfig.version}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&v=${googlePlacesConfig.version}`;
     script.async = true;
     script.defer = true;
 
@@ -130,55 +124,13 @@ export const loadGooglePlacesScript = (): Promise<void> => {
 };
 
 /**
- * Search for places using Google Places API
- */
-export const searchPlaces = async (
-  query: string,
-  options?: {
-    types?: string[];
-    location?: { lat: number; lng: number };
-    radius?: number;
-  }
-): Promise<PlaceResult[]> => {
-  if (!googlePlacesConfig.isConfigured) {
-    throw new Error('Google Places API key not configured');
-  }
-
-  await loadGooglePlacesScript();
-
-  return new Promise((resolve, reject) => {
-    const service = new window.google.maps.places.PlacesService(
-      document.createElement('div')
-    );
-
-    const request: google.maps.places.TextSearchRequest = {
-      query,
-      ...(options?.location && {
-        location: new window.google.maps.LatLng(
-          options.location.lat,
-          options.location.lng
-        ),
-      }),
-      ...(options?.radius && { radius: options.radius }),
-    };
-
-    service.textSearch(request, (results, status) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-        resolve(results as PlaceResult[]);
-      } else {
-        reject(new Error(`Places search failed: ${status}`));
-      }
-    });
-  });
-};
-
-/**
- * Get place details by place ID
+ * Get place details by place ID (for autocomplete only)
  */
 export const getPlaceDetails = async (
   placeId: string
 ): Promise<PlaceResult> => {
-  if (!googlePlacesConfig.isConfigured) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     throw new Error('Google Places API key not configured');
   }
 
@@ -198,8 +150,6 @@ export const getPlaceDetails = async (
           'geometry',
           'address_components',
           'name',
-          'formatted_phone_number',
-          'website',
         ],
       },
       (result, status) => {
@@ -220,13 +170,6 @@ declare global {
       maps?: {
         places?: {
           PlacesService: new (element: HTMLElement) => {
-            textSearch: (
-              request: google.maps.places.TextSearchRequest,
-              callback: (
-                results: google.maps.places.PlaceResult[] | null,
-                status: google.maps.places.PlacesServiceStatus
-              ) => void
-            ) => void;
             getDetails: (
               request: google.maps.places.PlaceDetailsRequest,
               callback: (

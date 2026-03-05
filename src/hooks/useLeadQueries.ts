@@ -5,6 +5,7 @@ import {
   createLead,
   updateLead,
   deleteLead,
+  bulkCreateLeads,
   type LeadFilters
 } from '@/api/leads/leads.api';
 import { isSupabaseConfigured } from '@/lib/supabaseClient';
@@ -32,7 +33,7 @@ export function useLeads(filters: LeadFilters = {}) {
   
   return useQuery({
     queryKey: leadKeys.list(filters),
-    queryFn: () => configured ? getLeads(filters) : getLeadsMock(),
+    queryFn: () => configured ? getLeads() : getLeadsMock(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
@@ -90,6 +91,17 @@ export function useUpdateLeadStatus() {
       updateLead(leadId, { outreachStatus: status }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: leadKeys.detail(variables.leadId) });
+      queryClient.invalidateQueries({ queryKey: leadKeys.lists() });
+    },
+  });
+}
+
+export function useBulkCreateLeads() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: bulkCreateLeads,
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: leadKeys.lists() });
     },
   });

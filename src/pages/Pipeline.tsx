@@ -13,6 +13,7 @@ import { Search, LayoutGrid, List, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDeals, useMoveDealStage, useCreateDeal } from '@/hooks/useDealQueries';
 import { useLeads } from '@/hooks/useLeadQueries';
+import { normalizeCategory } from '@/utils/categoryNormalizer';
 import { useDealUIStore } from '@/stores/dealUIStore';
 import type { DealWithRelations, DealStage } from '@/types/deal';
 import { toast } from 'sonner';
@@ -63,7 +64,7 @@ function DealCard({ deal }: DealCardProps) {
         {deal.lead?.category && (
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs">
-              {deal.lead.category}
+              {normalizeCategory(deal.lead.category)}
             </Badge>
           </div>
         )}
@@ -231,7 +232,7 @@ function NewDealModal({ open, onOpenChange }: { open: boolean; onOpenChange: (op
                   .filter(l => ['interested', 'follow_up'].includes(l.outreachStatus))
                   .map((lead) => (
                     <SelectItem key={lead.id} value={lead.id}>
-                      {lead.businessName} - {lead.category || 'No category'}
+                      {lead.businessName} - {normalizeCategory(lead.category)}
                     </SelectItem>
                   ))}
               </SelectContent>

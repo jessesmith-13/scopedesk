@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { normalizeCategory } from '@/utils/categoryNormalizer';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import ConvertToDealModal from './ConvertToDealModal';
@@ -98,7 +99,7 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">{lead.businessName}</h2>
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
-              <Badge variant="outline">{lead.category}</Badge>
+              <Badge variant="outline">{normalizeCategory(lead.category)}</Badge>
               <Badge className={getStatusColor(lead.outreachStatus)}>
                 {getStatusLabel(lead.outreachStatus)}
               </Badge>

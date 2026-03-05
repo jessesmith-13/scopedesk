@@ -9,46 +9,92 @@ import Invoices from '@/pages/Invoices';
 import Contacts from '@/pages/Contacts';
 import Documents from '@/pages/Documents';
 import Settings from '@/pages/Settings';
+import Login from '@/pages/Login';
+import ProtectedRoute from './ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
+    path: '/login',
+    Component: Login
+  },
+  {
     path: '/',
-    Component: Dashboard
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/pipeline',
-    Component: Pipeline
+    element: (
+      <ProtectedRoute>
+        <Pipeline />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/email',
-    Component: EmailCenter
+    element: (
+      <ProtectedRoute>
+        <EmailCenter />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/proposals',
-    Component: Proposals
+    element: (
+      <ProtectedRoute>
+        <Proposals />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/invoices',
-    Component: Invoices
+    element: (
+      <ProtectedRoute>
+        <Invoices />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/contacts',
-    Component: Contacts
+    element: (
+      <ProtectedRoute>
+        <Contacts />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/documents',
-    Component: Documents
+    element: (
+      <ProtectedRoute>
+        <Documents />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/analytics',
-    Component: Analytics
+    element: (
+      <ProtectedRoute>
+        <Analytics />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/templates',
-    Component: Templates
+    element: (
+      <ProtectedRoute>
+        <Templates />
+      </ProtectedRoute>
+    )
   },
   {
     path: '/settings',
-    Component: Settings
+    element: (
+      <ProtectedRoute>
+        <Settings />
+      </ProtectedRoute>
+    )
   }
 ]);
