@@ -23,7 +23,9 @@ export default function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) 
     neighborhood: '',
     phone: '',
     website_url: '',
-    website_status: 'unknown' as WebsiteStatus
+    website_status: 'unknown' as WebsiteStatus,
+    rating: '',
+    review_count: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,6 +47,8 @@ export default function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) 
         phone: formData.phone || null,
         websiteUrl: formData.website_url || null,
         websiteStatus: formData.website_status,
+        rating: formData.rating ? parseFloat(formData.rating) : null,
+        reviewCount: formData.review_count ? parseInt(formData.review_count) : null,
         lat: 47.6062, // Seattle default coordinates
         lng: -122.3321,
         city: 'Seattle',
@@ -63,7 +67,9 @@ export default function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) 
             neighborhood: '',
             phone: '',
             website_url: '',
-            website_status: 'unknown'
+            website_status: 'unknown',
+            rating: '',
+            review_count: ''
           });
           onOpenChange(false);
         },
@@ -166,6 +172,32 @@ export default function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) 
                 <SelectItem value="unknown">Unknown</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="rating">Google Rating</Label>
+            <Input
+              id="rating"
+              type="number"
+              step="0.1"
+              min="0"
+              max="5"
+              value={formData.rating}
+              onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
+              placeholder="4.5"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="review_count">Review Count</Label>
+            <Input
+              id="review_count"
+              type="number"
+              min="0"
+              value={formData.review_count}
+              onChange={(e) => setFormData({ ...formData, review_count: e.target.value })}
+              placeholder="120"
+            />
           </div>
 
           <div className="flex gap-2 pt-4">

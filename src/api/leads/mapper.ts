@@ -11,6 +11,15 @@ type LeadUpdate = Database['public']['Tables']['leads']['Update'];
  * Maps a Supabase lead row to domain Lead type
  */
 export function mapLeadFromDB(row: LeadRow): Lead {
+  console.log('🔍 Mapping lead from DB:', {
+    id: row.id,
+    business_name: row.business_name,
+    website_status: row.website_status,
+    outreach_status: row.outreach_status,
+    website_status_type: typeof row.website_status,
+    outreach_status_type: typeof row.outreach_status,
+  });
+  
   return {
     id: row.id,
     userId: row.user_id,
@@ -30,6 +39,8 @@ export function mapLeadFromDB(row: LeadRow): Lead {
     websiteUrl: row.website_url,
     websiteStatus: row.website_status,
     outreachStatus: row.outreach_status,
+    rating: row.rating,
+    reviewCount: row.review_count,
     score: row.score,
     scoreReason: row.score_reason as ScoreReason | null,
     source: row.source,
@@ -69,6 +80,8 @@ export function mapLeadToInsert(input: CreateLeadInput, userId: string): LeadIns
     website_url: input.websiteUrl,
     website_status: input.websiteStatus ?? 'unknown',
     outreach_status: input.outreachStatus ?? 'not_contacted',
+    rating: input.rating,
+    review_count: input.reviewCount,
     score: input.score ?? 0,
     score_reason: input.scoreReason,
     source: input.source,
@@ -101,6 +114,8 @@ export function mapLeadToUpdate(input: UpdateLeadInput): LeadUpdate {
   if (input.websiteUrl !== undefined) update.website_url = input.websiteUrl;
   if (input.websiteStatus !== undefined) update.website_status = input.websiteStatus;
   if (input.outreachStatus !== undefined) update.outreach_status = input.outreachStatus;
+  if (input.rating !== undefined) update.rating = input.rating;
+  if (input.reviewCount !== undefined) update.review_count = input.reviewCount;
   if (input.score !== undefined) update.score = input.score;
   if (input.scoreReason !== undefined) update.score_reason = input.scoreReason;
   if (input.source !== undefined) update.source = input.source;
@@ -108,4 +123,36 @@ export function mapLeadToUpdate(input: UpdateLeadInput): LeadUpdate {
   if (input.notes !== undefined) update.notes = input.notes;
 
   return update;
+}
+
+/**
+ * Maps multiple domain CreateLeadInput to Supabase Insert types
+ * Note: user_id is NOT included - must be added by the edge function
+ */
+export function mapLeadsToInsert(inputs: CreateLeadInput[]): Omit<LeadInsert, 'user_id' | 'dedupe_key'>[] {
+  return inputs.map(input => ({
+    business_name: input.businessName,
+    category: input.category,
+    sub_category: input.subCategory,
+    neighborhood: input.neighborhood,
+    address_line1: input.addressLine1,
+    address_line2: input.addressLine2,
+    city: input.city,
+    state: input.state,
+    postal_code: input.postalCode,
+    country: input.country ?? 'US',
+    lat: input.lat,
+    lng: input.lng,
+    phone: input.phone,
+    website_url: input.websiteUrl,
+    website_status: input.websiteStatus ?? 'unknown',
+    outreach_status: input.outreachStatus ?? 'not_contacted',
+    rating: input.rating,
+    review_count: input.reviewCount,
+    score: input.score ?? 0,
+    score_reason: input.scoreReason,
+    source: input.source,
+    source_place_id: input.sourcePlaceId,
+    notes: input.notes,
+  }));
 }
