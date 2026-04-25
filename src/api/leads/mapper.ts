@@ -1,25 +1,21 @@
 // Mapper functions to convert between Supabase DB types and domain Lead types
 
-import type { Database } from '@/types/supabase';
-import type { Lead, CreateLeadInput, UpdateLeadInput, ScoreReason } from '@/types/lead';
+import type { Database } from '@/types/supabase'
+import type {
+  Lead,
+  CreateLeadInput,
+  UpdateLeadInput,
+  ScoreReason,
+} from '@/types/lead'
 
-type LeadRow = Database['public']['Tables']['leads']['Row'];
-type LeadInsert = Database['public']['Tables']['leads']['Insert'];
-type LeadUpdate = Database['public']['Tables']['leads']['Update'];
+type LeadRow = Database['public']['Tables']['leads']['Row']
+type LeadInsert = Database['public']['Tables']['leads']['Insert']
+type LeadUpdate = Database['public']['Tables']['leads']['Update']
 
 /**
  * Maps a Supabase lead row to domain Lead type
  */
 export function mapLeadFromDB(row: LeadRow): Lead {
-  console.log('🔍 Mapping lead from DB:', {
-    id: row.id,
-    business_name: row.business_name,
-    website_status: row.website_status,
-    outreach_status: row.outreach_status,
-    website_status_type: typeof row.website_status,
-    outreach_status_type: typeof row.outreach_status,
-  });
-  
   return {
     id: row.id,
     userId: row.user_id,
@@ -48,20 +44,23 @@ export function mapLeadFromDB(row: LeadRow): Lead {
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-  };
+  }
 }
 
 /**
  * Maps multiple Supabase lead rows to domain Lead types
  */
 export function mapLeadsFromDB(rows: LeadRow[]): Lead[] {
-  return rows.map(mapLeadFromDB);
+  return rows.map(mapLeadFromDB)
 }
 
 /**
  * Maps domain CreateLeadInput to Supabase Insert type
  */
-export function mapLeadToInsert(input: CreateLeadInput, userId: string): LeadInsert {
+export function mapLeadToInsert(
+  input: CreateLeadInput,
+  userId: string
+): LeadInsert {
   return {
     user_id: userId,
     business_name: input.businessName,
@@ -87,7 +86,7 @@ export function mapLeadToInsert(input: CreateLeadInput, userId: string): LeadIns
     source: input.source,
     source_place_id: input.sourcePlaceId,
     notes: input.notes,
-  };
+  }
 }
 
 /**
@@ -96,41 +95,49 @@ export function mapLeadToInsert(input: CreateLeadInput, userId: string): LeadIns
 export function mapLeadToUpdate(input: UpdateLeadInput): LeadUpdate {
   const update: LeadUpdate = {
     updated_at: new Date().toISOString(),
-  };
+  }
 
-  if (input.businessName !== undefined) update.business_name = input.businessName;
-  if (input.category !== undefined) update.category = input.category;
-  if (input.subCategory !== undefined) update.sub_category = input.subCategory;
-  if (input.neighborhood !== undefined) update.neighborhood = input.neighborhood;
-  if (input.addressLine1 !== undefined) update.address_line1 = input.addressLine1;
-  if (input.addressLine2 !== undefined) update.address_line2 = input.addressLine2;
-  if (input.city !== undefined) update.city = input.city;
-  if (input.state !== undefined) update.state = input.state;
-  if (input.postalCode !== undefined) update.postal_code = input.postalCode;
-  if (input.country !== undefined) update.country = input.country;
-  if (input.lat !== undefined) update.lat = input.lat;
-  if (input.lng !== undefined) update.lng = input.lng;
-  if (input.phone !== undefined) update.phone = input.phone;
-  if (input.websiteUrl !== undefined) update.website_url = input.websiteUrl;
-  if (input.websiteStatus !== undefined) update.website_status = input.websiteStatus;
-  if (input.outreachStatus !== undefined) update.outreach_status = input.outreachStatus;
-  if (input.rating !== undefined) update.rating = input.rating;
-  if (input.reviewCount !== undefined) update.review_count = input.reviewCount;
-  if (input.score !== undefined) update.score = input.score;
-  if (input.scoreReason !== undefined) update.score_reason = input.scoreReason;
-  if (input.source !== undefined) update.source = input.source;
-  if (input.sourcePlaceId !== undefined) update.source_place_id = input.sourcePlaceId;
-  if (input.notes !== undefined) update.notes = input.notes;
+  if (input.businessName !== undefined)
+    update.business_name = input.businessName
+  if (input.category !== undefined) update.category = input.category
+  if (input.subCategory !== undefined) update.sub_category = input.subCategory
+  if (input.neighborhood !== undefined) update.neighborhood = input.neighborhood
+  if (input.addressLine1 !== undefined)
+    update.address_line1 = input.addressLine1
+  if (input.addressLine2 !== undefined)
+    update.address_line2 = input.addressLine2
+  if (input.city !== undefined) update.city = input.city
+  if (input.state !== undefined) update.state = input.state
+  if (input.postalCode !== undefined) update.postal_code = input.postalCode
+  if (input.country !== undefined) update.country = input.country
+  if (input.lat !== undefined) update.lat = input.lat
+  if (input.lng !== undefined) update.lng = input.lng
+  if (input.phone !== undefined) update.phone = input.phone
+  if (input.websiteUrl !== undefined) update.website_url = input.websiteUrl
+  if (input.websiteStatus !== undefined)
+    update.website_status = input.websiteStatus
+  if (input.outreachStatus !== undefined)
+    update.outreach_status = input.outreachStatus
+  if (input.rating !== undefined) update.rating = input.rating
+  if (input.reviewCount !== undefined) update.review_count = input.reviewCount
+  if (input.score !== undefined) update.score = input.score
+  if (input.scoreReason !== undefined) update.score_reason = input.scoreReason
+  if (input.source !== undefined) update.source = input.source
+  if (input.sourcePlaceId !== undefined)
+    update.source_place_id = input.sourcePlaceId
+  if (input.notes !== undefined) update.notes = input.notes
 
-  return update;
+  return update
 }
 
 /**
  * Maps multiple domain CreateLeadInput to Supabase Insert types
  * Note: user_id is NOT included - must be added by the edge function
  */
-export function mapLeadsToInsert(inputs: CreateLeadInput[]): Omit<LeadInsert, 'user_id' | 'dedupe_key'>[] {
-  return inputs.map(input => ({
+export function mapLeadsToInsert(
+  inputs: CreateLeadInput[]
+): Omit<LeadInsert, 'user_id' | 'dedupe_key'>[] {
+  return inputs.map((input) => ({
     business_name: input.businessName,
     category: input.category,
     sub_category: input.subCategory,
@@ -154,5 +161,5 @@ export function mapLeadsToInsert(inputs: CreateLeadInput[]): Omit<LeadInsert, 'u
     source: input.source,
     source_place_id: input.sourcePlaceId,
     notes: input.notes,
-  }));
+  }))
 }

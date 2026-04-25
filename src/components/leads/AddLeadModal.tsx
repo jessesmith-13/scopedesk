@@ -73,8 +73,13 @@ export default function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) 
           });
           onOpenChange(false);
         },
-        onError: () => {
-          toast.error('Failed to add lead');
+        onError: (error: Error) => {
+          console.error('Error creating lead:', error);
+          if (error.message?.includes('duplicate') || error.message?.includes('23505')) {
+            toast.error('This business already exists in your leads');
+          } else {
+            toast.error(`Failed to add lead: ${error.message}`);
+          }
         },
       });
     } catch {
@@ -201,11 +206,11 @@ export default function AddLeadModal({ open, onOpenChange }: AddLeadModalProps) 
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1" disabled={createLeadMutation.isPending}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              Add Lead
+            <Button type="submit" className="flex-1" disabled={createLeadMutation.isPending}>
+              {createLeadMutation.isPending ? 'Adding...' : 'Add Lead'}
             </Button>
           </div>
         </form>
