@@ -102,6 +102,7 @@ export default function ImportLeadsModal({ open, onOpenChange }: ImportLeadsModa
 
         // Store next page token for "Load More" button
         setNextPageToken(result.nextPageToken);
+        console.log('🔍 Preview complete - nextPageToken:', result.nextPageToken, 'hasToken:', !!result.nextPageToken);
 
         leads = result.businesses.map((business, index) => ({
           id: `google-${business.placeId || index}`,
@@ -632,7 +633,7 @@ export default function ImportLeadsModal({ open, onOpenChange }: ImportLeadsModa
                 </div>
                 
                 {/* Load More Button - Only show for Google Places with pagination */}
-                {useGooglePlaces && nextPageToken && currentPage < 3 && (
+                {useGooglePlaces && nextPageToken && (
                   <div className="flex justify-center pt-6">
                     <Button
                       onClick={handleLoadMore}
@@ -652,6 +653,13 @@ export default function ImportLeadsModal({ open, onOpenChange }: ImportLeadsModa
                         `Load More Results (Page ${currentPage + 1})`
                       )}
                     </Button>
+                  </div>
+                )}
+                
+                {/* Debug info */}
+                {useGooglePlaces && (
+                  <div className="text-xs text-muted-foreground text-center pt-2">
+                    Debug: useGooglePlaces={String(useGooglePlaces)}, nextPageToken={nextPageToken ? 'EXISTS' : 'NONE'}, page={currentPage}
                   </div>
                 )}
               </div>

@@ -12,8 +12,8 @@ import {
   Settings,
   Bell
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
 import type { ReactNode } from 'react';
 
 interface AppLayoutProps {
@@ -98,7 +98,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-64 min-w-0">
         {/* Top Bar */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-10 px-6 py-4">
           <div className="flex items-center justify-between">
@@ -122,7 +122,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-6">
+        <main className="p-6 overflow-x-hidden">
           {children}
         </main>
       </div>

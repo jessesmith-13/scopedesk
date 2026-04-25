@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "hono": "npm:hono@4",
+    "hono/": "npm:hono@4/",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2",
+    "std/http/server": "https://deno.land/std@0.168.0/http/server.ts"
+  }
+}

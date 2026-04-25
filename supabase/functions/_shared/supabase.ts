@@ -1,15 +1,14 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
-import type { Database } from "./types.ts";
+import { createClient } from '@supabase/supabase-js'
 
 export const createSupabaseAdmin = () => {
-  return createClient<Database>(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    }
-  );
-};
+  const url = Deno.env.get('SUPABASE_URL')!
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+  // IMPORTANT: no <Database> generic here (prevents "never" inference)
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}

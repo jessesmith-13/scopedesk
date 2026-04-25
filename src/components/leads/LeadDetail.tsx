@@ -1,105 +1,146 @@
-import { Copy, ExternalLink, MapPin, Phone, Globe, Calendar as CalendarIcon, Info, TrendingUp } from 'lucide-react';
-import { useUpdateLead } from '@/hooks/useLeadQueries';
-import { useDeals } from '@/hooks/useDealQueries';
-import { addDays } from 'date-fns';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import type { Lead, LeadOutreachStatus } from '@/types/lead';
-import { getStatusLabel, getStatusColor } from '@/types/lead';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { normalizeCategory } from '@/utils/categoryNormalizer';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import ConvertToDealModal from './ConvertToDealModal';
+import {
+  Copy,
+  ExternalLink,
+  MapPin,
+  Phone,
+  Globe,
+  Calendar as CalendarIcon,
+  Info,
+  TrendingUp,
+} from 'lucide-react'
+import { useUpdateLead } from '@/hooks/useLeadQueries'
+import { useDeals } from '@/hooks/useDealQueries'
+import { addDays } from 'date-fns'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import type { Lead, LeadOutreachStatus } from '@/types/lead'
+import { getStatusLabel, getStatusColor } from '@/types/lead'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { normalizeCategory } from '@/utils/categoryNormalizer'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import ConvertToDealModal from './ConvertToDealModal'
 
 interface LeadDetailProps {
-  lead: Lead;
+  lead: Lead
 }
 
 export default function LeadDetail({ lead }: LeadDetailProps) {
   // Mutations from React Query
-  const updateLeadMutation = useUpdateLead();
-  
+  const updateLeadMutation = useUpdateLead()
+
   // Get deals to check if this lead has a deal
-  const { data: deals = [] } = useDeals();
-  const existingDeal = deals.find(deal => deal.leadId === lead.id);
-  
-  const [noteText, setNoteText] = useState('');
-  const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined);
-  const [convertModalOpen, setConvertModalOpen] = useState(false);
+  const { data: deals = [] } = useDeals()
+  const existingDeal = deals.find((deal) => deal.leadId === lead.id)
+
+  const [noteText, setNoteText] = useState('')
+  const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined)
+  const [convertModalOpen, setConvertModalOpen] = useState(false)
 
   const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} copied to clipboard`);
-  };
+    navigator.clipboard.writeText(text)
+    toast.success(`${label} copied to clipboard`)
+  }
 
   const handleAddNote = () => {
     if (!noteText.trim()) {
-      toast.error('Please add a note');
-      return;
+      toast.error('Please add a note')
+      return
     }
-    
+
     // Update lead notes by appending to existing notes
-    const updatedNotes = lead.notes ? `${lead.notes}\n\n[${new Date().toLocaleString()}]\n${noteText}` : `[${new Date().toLocaleString()}]\n${noteText}`;
-    
+    const updatedNotes = lead.notes
+      ? `${lead.notes}\n\n[${new Date().toLocaleString()}]\n${noteText}`
+      : `[${new Date().toLocaleString()}]\n${noteText}`
+
     updateLeadMutation.mutate(
       { id: lead.id, updates: { notes: updatedNotes } },
       {
         onSuccess: () => {
-          setNoteText('');
-          toast.success('Note added');
+          setNoteText('')
+          toast.success('Note added')
         },
       }
-    );
-  };
+    )
+  }
 
   const handleSetFollowUp = (days?: number) => {
-    const date = days ? addDays(new Date(), days) : followUpDate;
+    const date = days ? addDays(new Date(), days) : followUpDate
     if (!date) {
-      toast.error('Please select a date');
-      return;
+      toast.error('Please select a date')
+      return
     }
     updateLeadMutation.mutate(
-      { id: lead.id, updates: { /* nextFollowUpAt will be added once DB supports it */ } },
+      {
+        id: lead.id,
+        updates: {
+          /* nextFollowUpAt will be added once DB supports it */
+        },
+      },
       {
         onSuccess: () => {
-          toast.success('Follow-up scheduled');
+          toast.success('Follow-up scheduled')
         },
       }
-    );
-  };
+    )
+  }
 
   const handleStatusChange = (status: LeadOutreachStatus) => {
     updateLeadMutation.mutate(
       { id: lead.id, updates: { outreachStatus: status } },
       {
         onSuccess: () => {
-          toast.success('Status updated');
+          toast.success('Status updated')
         },
       }
-    );
-  };
+    )
+  }
 
   // Format address for display
-  const fullAddress = [lead.addressLine1, lead.addressLine2, lead.city, lead.state, lead.postalCode]
+  const fullAddress = [
+    lead.addressLine1,
+    lead.addressLine2,
+    lead.city,
+    lead.state,
+    lead.postalCode,
+  ]
     .filter(Boolean)
-    .join(', ');
+    .join(', ')
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-auto max-h-[calc(100vh-10rem)]">
       <div className="p-6 space-y-6">
         {/* Business Info */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">{lead.businessName}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            {lead.businessName}
+          </h2>
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
-              <Badge variant="outline">{normalizeCategory(lead.category)}</Badge>
+              <Badge variant="outline">
+                {normalizeCategory(lead.category)}
+              </Badge>
               <Badge className={getStatusColor(lead.outreachStatus)}>
                 {getStatusLabel(lead.outreachStatus)}
               </Badge>
@@ -149,11 +190,7 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7"
-                  >
+                  <Button variant="outline" size="sm" className="h-7">
                     <ExternalLink className="w-3 h-3 mr-1" />
                     Open
                   </Button>
@@ -170,7 +207,10 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
               <span>{lead.neighborhood}</span>
               <span>•</span>
               <div className="flex items-center gap-1">
-                Score: <span className="font-semibold text-gray-900">{lead.score}</span>
+                Score:{' '}
+                <span className="font-semibold text-gray-900">
+                  {lead.score}
+                </span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -180,12 +220,18 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">
                       <p className="text-sm">
-                        <strong>Scoring:</strong><br />
-                        +30 if no website<br />
-                        +15 if needs quote form<br />
-                        +10 if not mobile-friendly<br />
-                        +10 if no clear CTA<br />
-                        +10 if no booking system<br />
+                        <strong>Scoring:</strong>
+                        <br />
+                        +30 if no website
+                        <br />
+                        +15 if needs quote form
+                        <br />
+                        +10 if not mobile-friendly
+                        <br />
+                        +10 if no clear CTA
+                        <br />
+                        +10 if no booking system
+                        <br />
                         -10 if rejected/do not contact
                       </p>
                     </TooltipContent>
@@ -200,14 +246,18 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
 
         {/* Outreach Workflow */}
         <div>
-          <h3 className="font-semibold text-gray-900 mb-4">Outreach Workflow</h3>
+          <h3 className="font-semibold text-gray-900 mb-4">
+            Outreach Workflow
+          </h3>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="status-select">Status</Label>
                 <Select
                   value={lead.outreachStatus}
-                  onValueChange={(value) => handleStatusChange(value as LeadOutreachStatus)}
+                  onValueChange={(value) =>
+                    handleStatusChange(value as LeadOutreachStatus)
+                  }
                 >
                   <SelectTrigger id="status-select">
                     <SelectValue />
@@ -218,6 +268,9 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
                     <SelectItem value="follow_up">Follow Up</SelectItem>
                     <SelectItem value="interested">Interested</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="converted_to_deal">
+                      Converted to Deal
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -234,13 +287,25 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
                 <PopoverContent className="w-auto p-0" align="start">
                   <div className="p-3 border-b">
                     <div className="flex gap-2 flex-wrap">
-                      <Button size="sm" variant="outline" onClick={() => handleSetFollowUp(1)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSetFollowUp(1)}
+                      >
                         Tomorrow
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleSetFollowUp(3)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSetFollowUp(3)}
+                      >
                         3 Days
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleSetFollowUp(7)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSetFollowUp(7)}
+                      >
                         1 Week
                       </Button>
                     </div>
@@ -251,7 +316,11 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
                     onSelect={setFollowUpDate}
                   />
                   <div className="p-3 border-t">
-                    <Button size="sm" className="w-full" onClick={() => handleSetFollowUp()}>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={() => handleSetFollowUp()}
+                    >
                       Confirm
                     </Button>
                   </div>
@@ -279,10 +348,13 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <TrendingUp className="w-4 h-4 text-blue-600" />
-                      <span className="font-medium text-sm text-blue-900">Ready to Convert?</span>
+                      <span className="font-medium text-sm text-blue-900">
+                        Ready to Convert?
+                      </span>
                     </div>
                     <p className="text-xs text-blue-700">
-                      This lead is interested! Add to CRM Pipeline to track deal value and close date.
+                      This lead is interested! Add to CRM Pipeline to track deal
+                      value and close date.
                     </p>
                   </div>
                   <Button
@@ -301,7 +373,12 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-green-600" />
                   <span className="text-sm text-green-900">
-                    ✓ In CRM Pipeline - <span className="font-medium">${existingDeal.dealValue?.toLocaleString() ?? '0'}</span> deal
+                    ✓ In CRM Pipeline -{' '}
+                    <span className="font-medium">
+                      $
+                      {((existingDeal.amountCents || 0) / 100).toLocaleString()}
+                    </span>{' '}
+                    deal
                   </span>
                 </div>
               </div>
@@ -341,7 +418,9 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
 
             {lead.notes && (
               <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans">{lead.notes}</pre>
+                <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans">
+                  {lead.notes}
+                </pre>
               </div>
             )}
             {!lead.notes && (
@@ -358,5 +437,5 @@ export default function LeadDetail({ lead }: LeadDetailProps) {
         />
       </div>
     </div>
-  );
+  )
 }

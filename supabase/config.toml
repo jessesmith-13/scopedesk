@@ -1,0 +1,5 @@
+[functions.deals]
+import_map = "./functions/import_map.json"
+
+[functions.leads]
+import_map = "./functions/import_map.json"
