@@ -1,21 +1,22 @@
-import { createBrowserRouter } from 'react-router';
-import Dashboard from '@/pages/Dashboard';
-import Analytics from '@/pages/Analytics';
-import Templates from '@/pages/Templates';
-import Pipeline from '@/pages/Pipeline';
-import EmailCenter from '@/pages/EmailCenter';
-import Proposals from '@/pages/Proposals';
-import Invoices from '@/pages/Invoices';
-import Contacts from '@/pages/Contacts';
-import Documents from '@/pages/Documents';
-import Settings from '@/pages/Settings';
-import Login from '@/pages/Login';
-import ProtectedRoute from './ProtectedRoute';
+import { createBrowserRouter } from 'react-router'
+import Dashboard from '@/pages/Dashboard'
+import Analytics from '@/pages/Analytics'
+import Templates from '@/pages/Templates'
+import Pipeline from '@/pages/Pipeline'
+import EmailCenter from '@/pages/EmailCenter'
+import Proposals from '@/pages/Proposals'
+import ProposalPreview from '@/pages/ProposalPreview'
+import Invoices from '@/pages/Invoices'
+import Contacts from '@/pages/Contacts'
+import Documents from '@/pages/Documents'
+import Settings from '@/pages/Settings'
+import Login from '@/pages/Login'
+import ProtectedRoute from './ProtectedRoute'
 
 export const router = createBrowserRouter([
   {
     path: '/login',
-    Component: Login
+    Component: Login,
   },
   {
     path: '/',
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Dashboard />
       </ProtectedRoute>
-    )
+    ),
   },
   {
     path: '/pipeline',
@@ -31,7 +32,7 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Pipeline />
       </ProtectedRoute>
-    )
+    ),
   },
   {
     path: '/email',
@@ -39,7 +40,7 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <EmailCenter />
       </ProtectedRoute>
-    )
+    ),
   },
   {
     path: '/proposals',
@@ -47,7 +48,15 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Proposals />
       </ProtectedRoute>
-    )
+    ),
+  },
+  {
+    path: '/proposals/:id',
+    element: (
+      <ProtectedRoute>
+        <ProposalPreview />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/invoices',
@@ -55,7 +64,7 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Invoices />
       </ProtectedRoute>
-    )
+    ),
   },
   {
     path: '/contacts',
@@ -63,7 +72,7 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Contacts />
       </ProtectedRoute>
-    )
+    ),
   },
   {
     path: '/documents',
@@ -71,7 +80,7 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Documents />
       </ProtectedRoute>
-    )
+    ),
   },
   {
     path: '/analytics',
@@ -79,7 +88,7 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Analytics />
       </ProtectedRoute>
-    )
+    ),
   },
   {
     path: '/templates',
@@ -87,7 +96,7 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Templates />
       </ProtectedRoute>
-    )
+    ),
   },
   {
     path: '/settings',
@@ -95,6 +104,6 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Settings />
       </ProtectedRoute>
-    )
-  }
-]);
+    ),
+  },
+])
